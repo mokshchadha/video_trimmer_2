@@ -1,4 +1,4 @@
-package com.yourdomain.video_trimmer_2
+package com.mokshchadha.video_trimmer_2
 
 import android.content.Context
 import android.media.MediaExtractor
