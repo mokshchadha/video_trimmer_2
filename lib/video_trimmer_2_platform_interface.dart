@@ -1,3 +1,4 @@
+// ignore: depend_on_referenced_packages
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'video_trimmer_2_method_channel.dart';
