@@ -1,0 +1,31 @@
+name: video_trimmer_2_example
+description: Demonstrates how to use the video_trimmer_2 plugin.
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.17.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  video_trimmer_2:
+    path: ../
+  
+  cupertino_icons: ^1.0.2
+  path_provider: ^2.0.11
+  image_picker: ^1.1.2
+  video_player: ^2.9.5
+  permission_handler: ^11.3.1
+  saver_gallery: ^4.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  test: ^1.25.2
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
