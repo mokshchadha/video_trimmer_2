@@ -17,7 +17,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  video_trimmer_2: ^0.0.1
+  video_trimmer_2: ^0.1.0
 ```
 
 ### Android Configuration
