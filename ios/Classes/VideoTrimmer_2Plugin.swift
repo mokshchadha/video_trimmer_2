@@ -60,6 +60,8 @@ public class VideoTrimmer2Plugin: NSObject, FlutterPlugin {
     
     // Insert time range from original video
     try compositionVideoTrack?.insertTimeRange(CMTimeRange(start: startTime, end: endTime), of: videoTrack, at: .zero)
+    compositionVideoTrack?.preferredTransform = videoTrack.preferredTransform
+
     
     // Handle audio track if available
     if let audioTrack = asset.tracks(withMediaType: .audio).first {
