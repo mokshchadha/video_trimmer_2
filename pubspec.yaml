@@ -1,6 +1,6 @@
 name: video_trimmer_2
 description: A Flutter plugin to trim videos on Android and iOS. An alternate to ffmpeg to trim and export videos.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/mokshchadha/video_trimmer_2
 license: MIT
 
