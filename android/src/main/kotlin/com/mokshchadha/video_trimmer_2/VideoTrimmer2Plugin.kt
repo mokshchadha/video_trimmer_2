@@ -102,9 +102,6 @@ class VideoTrimmer2Plugin: FlutterPlugin, MethodCallHandler {
         
         extractor.unselectTrack(i)
       }
-        
-      val rotation = format.getInteger(MediaFormat.KEY_ROTATION, 0)  
-      muxer.setOrientationHint(rotation)
       
       // Start muxing
       muxer.start()
