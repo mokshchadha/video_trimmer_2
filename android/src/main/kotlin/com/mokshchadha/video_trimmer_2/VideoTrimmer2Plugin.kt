@@ -102,6 +102,14 @@ class VideoTrimmer2Plugin: FlutterPlugin, MethodCallHandler {
         
         extractor.unselectTrack(i)
       }
+
+      val retriever = android.media.MediaMetadataRetriever()
+      retriever.setDataSource(inputFile.absolutePath)
+      val rotationString = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+      val rotation = rotationString?.toIntOrNull() ?: 0
+      retriever.release()
+
+      muxer.setOrientationHint(rotation)
       
       // Start muxing
       muxer.start()
