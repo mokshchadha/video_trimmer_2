@@ -36,6 +36,7 @@ class VideoTrimmer2Plugin: FlutterPlugin, MethodCallHandler {
         val path = call.argument<String>("path")
         val startMs = call.argument<Int>("startMs")
         val endMs = call.argument<Int>("endMs")
+        val rotation = call.argument<Int>("rotation") ?: -1
 
         if (path == null || startMs == null || endMs == null) {
           result.error("INVALID_ARGUMENTS", "Invalid arguments", null)
@@ -45,7 +46,7 @@ class VideoTrimmer2Plugin: FlutterPlugin, MethodCallHandler {
         executor.execute {
           try {
             val outputPath = generateOutputPath()
-            trimVideo(File(path), outputPath, startMs.toLong(), endMs.toLong())
+            trimVideo(File(path), outputPath, startMs.toLong(), endMs.toLong(), rotation)
 
             // Return result on main thread
             android.os.Handler(android.os.Looper.getMainLooper()).post {
