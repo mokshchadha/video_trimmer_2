@@ -36,17 +36,17 @@ class VideoTrimmer2Plugin: FlutterPlugin, MethodCallHandler {
         val path = call.argument<String>("path")
         val startMs = call.argument<Int>("startMs")
         val endMs = call.argument<Int>("endMs")
-        
+
         if (path == null || startMs == null || endMs == null) {
           result.error("INVALID_ARGUMENTS", "Invalid arguments", null)
           return
         }
-        
+
         executor.execute {
           try {
             val outputPath = generateOutputPath()
             trimVideo(File(path), outputPath, startMs.toLong(), endMs.toLong())
-            
+
             // Return result on main thread
             android.os.Handler(android.os.Looper.getMainLooper()).post {
               result.success(outputPath)
@@ -68,97 +68,101 @@ class VideoTrimmer2Plugin: FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(null)
     executor.shutdown()
   }
-  
+
   private fun generateOutputPath(): String {
     val outputDir = File(context.cacheDir, "trimmed_videos")
     if (!outputDir.exists()) {
       outputDir.mkdirs()
     }
-    
+
     val uuid = UUID.randomUUID().toString()
     return File(outputDir, "trim_$uuid.mp4").absolutePath
   }
-  
-  private fun trimVideo(inputFile: File, outputPath: String, startTimeMs: Long, endTimeMs: Long) {
+
+  private fun trimVideo(inputFile: File, outputPath: String, startTimeMs: Long, endTimeMs: Long, inputRotation: Int) {
     val extractor = MediaExtractor()
     val muxer = MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-    
+
     try {
       extractor.setDataSource(inputFile.absolutePath)
       val trackCount = extractor.trackCount
-      
+
       // Map to store track indices
       val indexMap = mutableMapOf<Int, Int>()
-      
+
       // Set up tracks
       for (i in 0 until trackCount) {
         extractor.selectTrack(i)
         val format = extractor.getTrackFormat(i)
         val mime = format.getString(MediaFormat.KEY_MIME)
-        
+
         // Add track to muxer
         val dstIndex = muxer.addTrack(format)
         indexMap[i] = dstIndex
-        
+
         extractor.unselectTrack(i)
       }
 
-      val retriever = android.media.MediaMetadataRetriever()
-      retriever.setDataSource(inputFile.absolutePath)
-      val rotationString = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
-      val rotation = rotationString?.toIntOrNull() ?: 0
-      retriever.release()
+      val rotation = if (inputRotation in listOf(0, 90, 180, 270)) {
+        inputRotation
+      } else {
+        val retriever = android.media.MediaMetadataRetriever()
+        retriever.setDataSource(inputFile.absolutePath)
+        val rotationString = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+        retriever.release()
+        rotationString?.toIntOrNull() ?: 0
+      }
 
       muxer.setOrientationHint(rotation)
-      
+
       // Start muxing
       muxer.start()
-      
+
       val bufferSize = 1024 * 1024 // 1MB buffer
       val buffer = ByteBuffer.allocate(bufferSize)
       val bufferInfo = MediaCodec.BufferInfo()
-      
+
       // Process each track
       for (i in 0 until trackCount) {
         extractor.selectTrack(i)
-        
+
         // Seek to the start position
         extractor.seekTo(startTimeMs * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
-        
+
         while (true) {
           val sampleSize = extractor.readSampleData(buffer, 0)
-          
+
           if (sampleSize < 0) {
             // End of stream
             break
           }
-          
+
           val sampleTime = extractor.sampleTime / 1000 // Convert to ms
-          
+
           if (sampleTime > endTimeMs) {
             // Past the end time
             break
           }
-          
+
           bufferInfo.size = sampleSize
           bufferInfo.offset = 0
           bufferInfo.flags = extractor.sampleFlags
           bufferInfo.presentationTimeUs = extractor.sampleTime - (startTimeMs * 1000)
-          
+
           // Write sample to muxer
           muxer.writeSampleData(indexMap[i]!!, buffer, bufferInfo)
-          
+
           extractor.advance()
         }
-        
+
         extractor.unselectTrack(i)
       }
-      
+
       // Finish up
       muxer.stop()
       muxer.release()
       extractor.release()
-      
+
     } catch (e: IOException) {
       throw IOException("Failed to trim video: ${e.message}")
     }
