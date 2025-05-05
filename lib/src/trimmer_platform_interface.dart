@@ -14,11 +14,12 @@ class TrimmerPlatform {
   /// [endMs] - End position in milliseconds
   ///
   /// Returns a [Future] that completes with the trimmed video [File]
-  Future<File> trimVideo(File file, int startMs, int endMs) async {
+  Future<File> trimVideo(File file, int startMs, int endMs, int rotation) async {
     final Map<String, dynamic> arguments = {
       'path': file.path,
       'startMs': startMs,
       'endMs': endMs,
+      'rotation': rotation
     };
 
     final String? outputPath = await _channel.invokeMethod<String>(

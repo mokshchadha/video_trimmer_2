@@ -18,6 +18,7 @@ class Trimmer {
     required File file,
     required int startMs,
     required int endMs,
+    int rotation = 90,
   }) async {
     // Validate input parameters
     if (!file.existsSync()) {
@@ -33,7 +34,7 @@ class Trimmer {
           'End time must be greater than start time: $endMs <= $startMs');
     }
 
-    return _platform.trimVideo(file, startMs, endMs);
+    return _platform.trimVideo(file, startMs, endMs, rotation);
   }
 
   getPlatformVersion() {}
